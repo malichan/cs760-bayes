@@ -31,7 +31,7 @@ string CPT0::toString() const {
     ss << "CPT of attribute " << self << endl;
     
     ss.setf(ios::fixed, ios::floatfield);
-    ss.precision(6);
+    ss.precision(PRECISION);
     for (int i = 0; i < table.size(); ++i)
         ss << "Pr(" << self << " = " << i << ") = " << table[i] << endl;
     
@@ -73,7 +73,7 @@ string CPT1::toString() const {
     ss << "CPT of attribute " << self << endl;
     
     ss.setf(ios::fixed, ios::floatfield);
-    ss.precision(6);
+    ss.precision(PRECISION);
     for (int j = 0; j < table[0].size(); ++j)
         for (int i = 0; i < table.size(); ++i)
             ss << "Pr(" << self << " = " << i << " | " << parents[0] << " = " << j << ") = " << table[i][j] << endl;
@@ -125,7 +125,7 @@ string CPT2::toString() const {
     ss << "CPT of attribute " << self << endl;
     
     ss.setf(ios::fixed, ios::floatfield);
-    ss.precision(6);
+    ss.precision(PRECISION);
     for (int k = 0; k < table[0][0].size(); ++k)
         for (int j = 0; j < table[0].size(); ++j)
             for (int i = 0; i < table.size(); ++i)
@@ -135,9 +135,12 @@ string CPT2::toString() const {
     return ss.str();
 }
 
-BayesNet::BayesNet(const DatasetMetadata* metadata, const vector<Instance*>& instances) : metadata(metadata), instances(instances) {
-    createMutualInfoTable();
-    createMaximalSpanningTree();
+BayesNet::BayesNet(const DatasetMetadata* metadata, const vector<Instance*>& instances, bool treeAugmented) :
+    metadata(metadata), instances(instances), treeAugmented(treeAugmented) {
+    if (treeAugmented) {
+        createMutualInfoTable();
+        createMaximalSpanningTree();
+    }
     createBayesNet();
     createProbabilityTables();
 }
@@ -223,14 +226,18 @@ string BayesNet::getMutualInfoTable() const {
     stringstream ss;
     ss << "<Conditional Mutual Information Table>" << endl;
     
-    ss.setf(ios::fixed, ios::floatfield);
-    ss.precision(6);
-    for (int i = 0; i < metadata->numOfFeatures; ++i) {
-        for (int j = 0; j < metadata->numOfFeatures; ++j) {
-            if (j != 0) ss << "\t";
-            ss << mutualInfoTable[i][j];
+    if (treeAugmented) {
+        ss.setf(ios::fixed, ios::floatfield);
+        ss.precision(PRECISION);
+        for (int i = 0; i < mutualInfoTable.size(); ++i) {
+            for (int j = 0; j < mutualInfoTable[i].size(); ++j) {
+                if (j != 0) ss << DELIMITER;
+                ss << mutualInfoTable[i][j];
+            }
+            ss << endl;
         }
-        ss << endl;
+    } else {
+        ss << "Not applicable" << endl;
     }
     
     return ss.str();
@@ -270,12 +277,16 @@ string BayesNet::getMaximalSpanningTree() const {
     stringstream ss;
     ss << "<Maximal Spanning Tree>" << endl;
     
-    ss << "{";
-    for (int i = 0; i < maximalSpanningTree.size(); ++i) {
-        if (i != 0) ss << ", ";
-        ss << "(" << maximalSpanningTree[i].first << ", " << maximalSpanningTree[i].second << ")";
+    if (treeAugmented) {
+        ss << "{";
+        for (int i = 0; i < maximalSpanningTree.size(); ++i) {
+            if (i != 0) ss << ", ";
+            ss << "(" << maximalSpanningTree[i].first << ", " << maximalSpanningTree[i].second << ")";
+        }
+        ss << "}" << endl;
+    } else {
+        ss << "Not applicable" << endl;
     }
-    ss << "}" << endl;
     
     return ss.str();
 }
@@ -296,12 +307,12 @@ void BayesNet::createBayesNet() {
 
 string BayesNet::getBayesNet() const {
     stringstream ss;
-    ss << "<Bayes Net Structure>" << endl;
+    ss << "<Bayesian Network Structure>" << endl;
     
     for (int i = 0; i < bayesNet.size(); ++i) {
         ss << metadata->featureList[i]->getName();
         for (int j = 0; j < bayesNet[i].size(); ++j) {
-            ss << "\t";
+            ss << DELIMITER;
             int featureIdx = bayesNet[i][j];
             if (featureIdx < metadata->numOfFeatures)
                 ss << metadata->featureList[featureIdx]->getName();

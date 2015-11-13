@@ -3,6 +3,9 @@
 
 #include "Dataset.hpp"
 
+const char DELIMITER = ' ';
+const int PRECISION = 6;
+
 struct CPT {
 protected:
     int self;
@@ -78,6 +81,7 @@ class BayesNet {
 private:
     const DatasetMetadata* metadata;
     const vector<Instance*>& instances;
+    bool treeAugmented;
     
     vector<vector<double> > mutualInfoTable;
     vector<pair<int, int> > maximalSpanningTree;
@@ -93,7 +97,7 @@ private:
     void createProbabilityTables();
     
 public:
-    BayesNet(const DatasetMetadata* metadata, const vector<Instance*>& instances);
+    BayesNet(const DatasetMetadata* metadata, const vector<Instance*>& instances, bool treeAugmented);
     
     ~BayesNet() {
         for (int i = 0; i < probabilityTables.size(); ++i)
