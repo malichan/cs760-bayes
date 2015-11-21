@@ -4,7 +4,7 @@
 #include "Dataset.hpp"
 
 const char DELIMITER = ' ';
-const int PRECISION = 6;
+const int PRECISION = 16;
 
 struct CPT {
 protected:

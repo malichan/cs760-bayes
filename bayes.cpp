@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
         const vector<Instance*>& testSet = dataset->getTestSet();
         int correctCount = 0;
         cout << "<Predictions for Test-set Instances>" << endl;
-        cout << "Predicted class" << DELIMITER << "Actual class" << DELIMITER << "Posterior probability" << endl;
+        cout << "Predicted" << DELIMITER << "Actual" << DELIMITER << "Probability" << endl;
         cout.setf(ios::fixed, ios::floatfield);
         cout.precision(PRECISION);
         for (int i = 0; i < testSet.size(); ++i) {
